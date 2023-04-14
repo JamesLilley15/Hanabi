@@ -1,3 +1,6 @@
+### Todo:
+# Change own hand when we're running out of cards at the end of the game
+
 import random
 from re import L
 from sys import float_repr_style, exit
@@ -161,6 +164,7 @@ from tkinter.ttk import *
 class gui(tk.Tk, hanabi):
     def __init__(self):
         #super().__init__()
+        self.colours = ['Red', 'Green', 'Blue', 'White', 'Yellow', 'Multi']
 
         self.menu = tk.Tk()
         self.menu.title('Hanabi')
@@ -175,8 +179,6 @@ class gui(tk.Tk, hanabi):
         self.scalevar = tk.StringVar()
         self.menu.scale= tk.Scale(self.menu, from_=2, to=5, orient=tk.HORIZONTAL, variable=self.scalevar)
         self.menu.scale.pack()
-
-        self.colours = ['Red', 'Green', 'Blue', 'White', 'Yellow', 'Multi']
 
         # Button to set player number to the scale and continue
         cont = tk.IntVar()
@@ -226,19 +228,23 @@ class gui(tk.Tk, hanabi):
             self.PlayerFive = self.open_player_window(4)
             self.PlayerWindows.append(self.PlayerFive)
 
-    def colour_label(self, frame, colour_name):
-                if colour_name == 'Multi':
-                    return tk.Label(frame, text=f' {colour_name}:    empty ', borderwidth=2, relief="groove", width=15, height=5)
-                elif colour_name in ['Red', 'Green', 'Blue']:
+    def colour_label(self, frame, c, d):
+                if c == 'Multi':
+                    return tk.Label(frame, text=f' {c}:    {d} ', borderwidth=2, relief="groove", width=15, height=5)
+                elif c in ['Red', 'Green', 'Blue']:
                     fg_colour = 'white'
                 else:
                     fg_colour = 'black'
-                return tk.Label(frame, text=f' {colour_name}:    empty ', bg=colour_name.lower(), fg=fg_colour, borderwidth=2, relief="groove", width=15, height=5)
+                return tk.Label(frame, text=f' {c}:    {d} ', bg=c.lower(), fg=fg_colour, borderwidth=2, relief="groove", width=15, height=5)
 
-    def colour_piles(self, frame):
+    def colour_piles(self, frame, play_or_discard):
         labels_dict = {}
-        for c in self.colours:
-            labels_dict[c] = self.colour_label(frame, c)
+        if play_or_discard == 'play':
+            decks = self.Hanabi.played_decks.items()
+        else:
+            decks = self.Hanabi.discard_decks.items()
+        for c, d in decks:
+            labels_dict[c] = self.colour_label(frame, c, d)
             if c == ['Red']:
                 labels_dict[c].pack(side = LEFT, pady=(0, 5) ,padx=(5, 0))
             else:
@@ -250,11 +256,31 @@ class gui(tk.Tk, hanabi):
         window = tk.Toplevel(self.menu)
         window.protocol("WM_DELETE_WINDOW", exit)
         window.title('Player ' + str(player_num+1) + "'s Window")
-        window.player_num = player_num
+        window.player_num = player_num       
+        window.geometry('1000x700')
+        
+        # Display INfo and Lives
+        window.infolivesframe = tk.Frame(window)
+        window.infolivesframe.pack(side=BOTTOM)
+        window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1) + '\n')
+        window.info.pack(side= LEFT)        
+        window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1)+ '\n')
+        window.lives.pack(side=LEFT, padx = 30)
+
+        # Set up frame for own hand
+        window.own_hand_frame = tk.Frame(window, borderwidth=2, relief="groove")
+        window.own_hand_frame.pack(side=TOP)
+        window.label = tk.Label(window.own_hand_frame, text = 'Your Own Hand')
+        window.label.pack(side=TOP)
+        for i in range(5):
+            cardnum = str(i+1)
+            window.cardlabel = tk.Label(window.own_hand_frame, bg = 'White', relief = "groove", borderwidth = 2, text = 'Card #' + cardnum, width=10, height=5)
+            window.cardlabel.pack(side = LEFT)
+
+        ## DISPLAY OTHER PLAYERS HANDS ##
         # Set up frame for the hands
         window.playershandsframe =ttk.Frame(window)#, borderwidth=2, relief="groove")
         window.playershandsframe.pack(side=TOP)
-
         # Set up frame for each hand
         window.playershandsframes = []
         k = 1
@@ -289,78 +315,250 @@ class gui(tk.Tk, hanabi):
         # Display discard and play piles:
         window.discard_frame = tk.Frame(window, borderwidth=2, relief="groove")
         window.discard_frame.pack(side=TOP, pady=(10, 0))
-        window.geometry('1500x500')
         window.discardpileslabel = tk.Label(window.discard_frame, text='Discard Piles')
         window.discardpileslabel.pack(side=TOP)
-        window.discardpileslabels = self.colour_piles(window.discard_frame)
+        window.discardpileslabels = self.colour_piles(window.discard_frame, 'discard')
 
         window.play_frame = tk.Frame(window, borderwidth=2, relief="groove")
         window.play_frame.pack(side=TOP, pady=(10, 0))
         window.playpileslabel = tk.Label(window.play_frame, text='Play Piles')
         window.playpileslabel.pack(side=TOP)
-        window.playpileslabels = self.colour_piles(window.play_frame)
+        window.playpileslabels = self.colour_piles(window.play_frame, 'play')
         
         window.actionsframe = ttk.Frame(window)#, borderwidth=2, relief='groove')
         window.actionsframe.pack(side=TOP, pady=(10, 0))
 
-        window.actionslabel = ttk.Label(window.actionsframe, text='Choose your Action:')
-        window.actionslabel.pack(side=TOP)
-
-        window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(player_num))#, tk.borderwidth=2, relief="groove", width=15, height=3)
-        #window.playaction['command'] = self.guiplay(player_num)
-        window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
-        window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20)
-        window.discardaction['command'] = self.guidiscard(player_num)
-        window.discardaction.pack(side=LEFT, pady=(0, 5))
-        if self.Hanabi.info_num != 0:
-            window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20)
-            #window.infoaction['command'] = self.guigiveinfo(player_num)
-            window.infoaction.pack(side=LEFT, pady=(0, 5))
+        if window.player_num == 0:
+            window.actionslabel = ttk.Label(window.actionsframe, text='Choose your Action:')
+            window.actionslabel.pack(side=TOP)
+            window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(window, player_num))
+            window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
+            window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(window, player_num))
+            window.discardaction.pack(side=LEFT, pady=(0, 5))
+            if self.Hanabi.info_num != 0:
+                window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(window, player_num))
+                #window.infoaction['command'] = self.guigiveinfo(player_num)
+                window.infoaction.pack(side=LEFT, pady=(0, 5))
+            else:
+                window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=20)
+                window.infoaction.pack(side=LEFT, pady=(0, 5))
         else:
-            window.infoaction = tk.Label(window.actionsframe, text = "\nCan't Give Information\n", width=20)
-            window.infoaction.pack(side=LEFT, pady=(0, 5))
+            window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
+            window.waitmessage.pack(side = TOP, pady=(0,10))
             
         return window
 
-    def guidiscard(self, player_num):
+    def guidiscard(self, window, player_num):
+        # Remove the action buttons
+        for widget in window.actionsframe.winfo_children():
+            widget.destroy()
+
+        # Choose the card, returns and integer between 0 and 4
+        colour, number, place_in_hand = self.choose_card(window, player_num)
+
+        # Update variables
+        self.Hanabi.discard_decks[colour].append(number)
+        if self.Hanabi.info_num != 8:
+            self.Hanabi.info_num+=1
+
+        window.message = tk.Label(window.actionsframe, text='\n\n Card Discarded... \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+        window.message.pack(side = TOP, pady=(0,10))
+        
+        self.redeal_card(place_in_hand, player_num)
+
+        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
+        window.end_turn.pack(side=TOP, pady = 10)
+
         return
 
-    def guiplay(self, player_num):
-        #win, played = self.Hanabi.play()
-        if FALSE:#win:
-            self.guiwin()
-        elif True:
-            self.PlayerWindows[player_num].playaction.destroy()
-            self.PlayerWindows[player_num].discardaction.destroy()
-            self.PlayerWindows[player_num].infoaction.destroy()        
-            self.PlayerWindows[player_num].successmessage = tk.Label(self.PlayerWindows[player_num], text='\n\n Card Successfully Played! :) \n\n', width =100, relief = 'groove')
-            self.PlayerWindows[player_num].successmessage.pack(side = TOP, pady=(0,10))
+    def setvar(self,value,cont):
+                cont.set(1)
+                self.v = value
+                return 
+    
+    def guiinfo(self, window, player_num):
+        # Remove the action buttons
+        for widget in window.actionsframe.winfo_children():
+            widget.destroy()
+        
+        # Choose player to give info to
+        if self.Hanabi.num_players != 1:
+            window.label = tk.Label(window.actionsframe, text = 'Please Choose which Player to Give Information to')
+            window.label.pack(side=TOP)
+            cont = tk.IntVar()
+            for i in range(self.Hanabi.num_players):
+                k = 0
+                if i != player_num:
+                    if i == 0:
+                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(0, cont))
+                    elif i == 1:
+                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(1, cont))
+                    elif i == 2:
+                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(2, cont))
+                    elif i == 3:
+                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(3, cont))
+                    else:
+                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(4, cont))
+                    if k == 0:
+                        window.button.pack(side=TOP)
+                    else:
+                        window.button.pack(side=LEFT)
+                    k += 1
+            window.wait_variable(cont)
+            playerinfo = int(self.v)
+            for widget in window.actionsframe.winfo_children():
+                widget.destroy()
+        
+        # Choose Colour or Number
+        window.label = tk.Label(window.actionsframe, text = 'Please Choose which Type of Information to Give')
+        window.label.pack(side=TOP)
+        cont = tk.IntVar()
+        window.button = tk.Button(window.actionsframe, text='Colour', command=lambda: self.setvar('colour', cont))
+        window.button.pack(side=TOP)
+        window.button = tk.Button(window.actionsframe, text='Number', command=lambda: self.setvar('number', cont))
+        window.button.pack(side=LEFT)
+        window.wait_variable(cont)
+        for widget in window.actionsframe.winfo_children():
+            widget.destroy()
+        colourornumber = str(self.v)
+
+        # Choose which colour or number
+        if colourornumber == 'colour':
+            window.label = tk.Label(window.actionsframe, text = 'Please Choose a Colour to Give Information On')
+            window.label.pack(side=TOP)
+            window.button = tk.Button(window.actionsframe, text='Red(s)', command=lambda: self.setvar('Red', cont))
+            window.button.pack(side=TOP)
+            window.button = tk.Button(window.actionsframe, text='Green(s)', command=lambda: self.setvar('Green', cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='Blue(s)', command=lambda: self.setvar('Blue', cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='White(s)', command=lambda: self.setvar('White', cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='Yellow(s)', command=lambda: self.setvar('Yellow', cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='Multi(s)', command=lambda: self.setvar('Multi', cont))
+            window.button.pack(side=LEFT)
         else:
-            self.PlayerWindows[player_num].playaction.destroy()
-            self.PlayerWindows[player_num].discardaction.destroy()
-            self.PlayerWindows[player_num].infoaction.destroy()            
-            self.PlayerWindows[player_num].successmessage = ttk.Label(self.PLayerWindows[player_num], text='\n\n Failed to Play Card... :(\n\n', width =100)
-            self.PlayerWindows[player_num].successmessage.pack(side = TOP, pady=(0,10))
-        return
-        #self.refresh_display()
+            window.label = tk.Label(window.actionsframe, text = 'Please Choose a Number to Give Information On')
+            window.label.pack(side=TOP)
+            window.button = tk.Button(window.actionsframe, text='One(s)', command=lambda: self.setvar(1, cont))
+            window.button.pack(side=TOP)
+            window.button = tk.Button(window.actionsframe, text='Two(s)', command=lambda: self.setvar(2, cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='Three(s)', command=lambda: self.setvar(3, cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='Four(s)', command=lambda: self.setvar(4, cont))
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.actionsframe, text='Five(s)', command=lambda: self.setvar(5, cont))
+            window.button.pack(side=LEFT)
+        window.wait_variable(cont)
+        for widget in window.actionsframe.winfo_children():
+            widget.destroy()
+        if colourornumber == 'colour':
+            info = str(self.v)
+        else:
+            info = int(self.v)
+        for widget in self.PlayerWindows[playerinfo].actionsframe.winfo_children():
+            widget.destroy()
 
+        # Give the information
+        self.PlayerWindows[playerinfo].label = tk.Label(self.PlayerWindows[playerinfo].actionsframe, text = 'Player ' + str(player_num+1) + ' tells you that your Cards ' + str(self.findcards(info,playerinfo)) + ' are ' + str(info))
+        self.PlayerWindows[playerinfo].label.pack(side=TOP)
+
+        self.Hanabi.info_num+=-1
+
+        # End turn
+        window.message = tk.Label(window.actionsframe, text='\n\n Information Given! \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+        window.message.pack(side = TOP, pady=(0,10))
+        
+        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
+        window.end_turn.pack(side=TOP, pady = 10)
+        return
+    
+    def findcards(self, info, hand):
+        return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x]
+
+    def choose_card(self, window, player_num):
+        # Tell player to choose a card
+        window.label = tk.Label(window.actionsframe, text = 'Please Choose a Card')
+        window.label.pack(side=TOP)
+
+        # Scale to choose card
+        window.scalevar = tk.StringVar()
+        window.scale= tk.Scale(window.actionsframe, from_=1, to=5, orient=tk.HORIZONTAL, variable=window.scalevar)
+        window.scale.pack()
+
+        # Button to confirm
+        cont = tk.IntVar()
+        window.button = tk.Button(window.actionsframe, text='Confirm', command=lambda: cont.set(1))
+        window.button.pack()
+        window.button.wait_variable(cont)
+
+        chosen_number = int(window.scalevar.get())-1
+        colour, number = self.Hanabi.players_hands[player_num][chosen_number]
+
+        window.label.destroy()
+        window.scale.destroy()
+        window.button.destroy()
+
+        return colour, number, chosen_number
+        
+    def guiplay(self, window, player_num):
+        # Remove the action buttons
+        for widget in window.actionsframe.winfo_children():
+            widget.destroy()
+
+        # Choose the card, returns and integer between 0 and 4
+        colour, number, place_in_hand = self.choose_card(window, player_num)
+
+        if number == self.Hanabi.played_decks[colour]+1:
+            self.Hanabi.played_decks[colour]+=1
+            if all(value == 5 for value in self.Hanabi.played_decks.values()):
+                self.guiwin()
+            else:
+                window.message = tk.Label(window.actionsframe, text='\n\n Card Successfully Played! :) \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+                window.message.pack(side = TOP, pady=(0,10))
+        else:         
+            self.Hanabi.lives_num+=-1
+            if self.Hanabi.lives_num == 0:
+                self.guilose()
+            else:
+                window.message = tk.Label(window.actionsframe, text='\n\n Failed to Play Card... :( \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+                window.message.pack(side = TOP, pady=(0,10))
+        
+        self.redeal_card(place_in_hand, player_num)
+
+        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
+        window.end_turn.pack(side=TOP, pady = 10)
+
+        return
+    
+    def redeal_card(self, card, hand_num):
+        # pop(index) method removes a random card from the deck and stores it in dealt_card
+        del self.Hanabi.players_hands[hand_num][card]
+        dealt_card = self.Hanabi.deck.pop(random.randrange(len(self.Hanabi.deck)))
+        self.Hanabi.players_hands[hand_num].append(dealt_card)
+        print(self.Hanabi.players_hands[hand_num])
+        return
+    
     def refresh_display(self, windows_reset, last_player):
         for window in windows_reset:
-            
             # Re-size window
             #window.geometry('1500x500')
 
-            ## Display other players hands ##
-            #last_player = 'window.actionslabel' in locals() or 'window.actionslabel' in globals()
-            if window.player_num == last_player:
-                window.actionsframe.pack_forget()
-            #player_number
+            # Display INfo and Lives
+            window.info.destroy()
+            window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1))
+            window.info.pack(side=BOTTOM)  
+            window.lives.destroy()      
+            window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1))
+            window.lives.pack(side=LEFT)
 
             # Set up frame for each other hand
-            for [player_hand_num, players_hand_frame] in window.playershandsframe:
+            for [player_hand_num, players_hand_frame] in window.playershandsframes:
                 # Clear widgets from each hands frames
                 for widget in players_hand_frame.winfo_children():
-                    widget.destroy
+                    widget.destroy()
                 
                 # Name this frame
                 name = 'Player ' + str(player_hand_num) + "'s Hand"
@@ -368,96 +566,61 @@ class gui(tk.Tk, hanabi):
                 window.label.pack(side=TOP)
                 
                 # Re-deal the hands
+                handnum = player_hand_num-1
                 for cardnum in range(5):
-                    colour = str(self.Hanabi.players_hands[player_hand_num][cardnum][0])
-                    number = str(self.Hanabi.players_hands[player_hand_num][cardnum][1])
+                    colour = str(self.Hanabi.players_hands[handnum][cardnum][0])
+                    number = str(self.Hanabi.players_hands[handnum][cardnum][1])
+
                     if colour == 'Blue' or colour == 'Red' or colour == 'Green':
-                        window.cardlabel = tk.Label(players_hand_frame[handnum][1], fg = 'White', bg = colour, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
+                        window.cardlabel = tk.Label(players_hand_frame, fg = 'White', bg = colour, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
                         window.cardlabel.pack(side = LEFT)
                     if colour == 'Yellow' or colour == 'White':
-                        window.cardlabel = tk.Label(players_hand_frame[handnum][1], bg = colour, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
+                        window.cardlabel = tk.Label(players_hand_frame, bg = colour, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
                         window.cardlabel.pack(side = LEFT)
                     if colour == 'Multi':                    
-                        window.cardlabel = tk.Label(players_hand_frame[handnum][1], relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
+                        window.cardlabel = tk.Label(players_hand_frame, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
                         window.cardlabel.pack(side = LEFT)
 
             
-            ## Display discard and play piles ##
-            # Display discard piles
-            window.discard_frame = tk.Frame(window, borderwidth=2, relief="groove")
-            window.discard_frame.pack(side=TOP, pady=(10, 0))
-
-            for pile, pile_depth  in self.Hanabi.discard_decks:
-                name = str(pile) + ': ' + str(pile_depth)
-                window.discardlabel = tk.Label(window.discard_frame, text=name)
-
-            window.discardpileslabels = {}
+            ## Update discard and play piles ##
+            for widget in window.discard_frame.winfo_children():
+                widget.destroy()
             window.discardpileslabel = tk.Label(window.discard_frame, text='Discard Piles')
             window.discardpileslabel.pack(side=TOP)
-            window.discardredlabel = tk.Label(window.discard_frame, text=' Red:    empty ', bg = 'red', fg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.discardredlabel.pack(side = LEFT, padx=(5, 0), pady=(0, 5))
-            window.discardpileslabels['Red'] = window.discardpileslabel
-            window.discardgreenlabel = tk.Label(window.discard_frame, text=' Green:  empty ', bg = 'green', fg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.discardgreenlabel.pack(side = LEFT, pady=(0, 5))
-            window.discardpileslabels['Green'] = window.discardpileslabel
-            window.discardbluelabel = tk.Label(window.discard_frame, text=' Blue:   empty ', bg = 'blue', fg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.discardbluelabel.pack(side = LEFT, pady=(0, 5))
-            window.discardpileslabels['Blue'] = window.discardpileslabel
-            window.discardwhitelabel = tk.Label(window.discard_frame, text=' White:  empty ', bg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.discardwhitelabel.pack(side = LEFT, pady=(0, 5))
-            window.discardpileslabels['White'] = window.discardpileslabel
-            window.discardyellowlabel = tk.Label(window.discard_frame, text=' Yellow: empty ', bg = 'yellow', borderwidth=2, relief="groove", width=15, height=5)
-            window.discardyellowlabel.pack(side = LEFT, pady=(0, 5))
-            window.discardpileslabels['Yellow'] = window.discardpileslabel
-            window.discardmultilabel = tk.Label(window.discard_frame, text=' Multi:  empty ', borderwidth=2, relief="groove", width=15, height=5)
-            window.discardmultilabel.pack(side = LEFT, padx=(0, 5), pady=(0, 5))
-            window.discardpileslabels['Multi'] = window.discardpileslabel
+            window.discardpileslabels = self.colour_piles(window.discard_frame, 'discard')
 
-
-            # Display play piles
-            window.play_frame = tk.Frame(window, borderwidth=2, relief="groove")
-            window.play_frame.pack(side=TOP, pady=(10, 0))
-
-            window.playpileslabels = {}
+            for widget in window.play_frame.winfo_children():
+                widget.destroy()
             window.playpileslabel = tk.Label(window.play_frame, text='Play Piles')
             window.playpileslabel.pack(side=TOP)
-
-            window.playredlabel = tk.Label(window.play_frame, text=' Red:    empty ', bg = 'red', fg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.playredlabel.pack(side = LEFT, padx=(5, 0), pady=(0, 5))
-            window.playpileslabels['Red'] = window.playpileslabel
-            window.playgreenlabel = tk.Label(window.play_frame, text=' Green:  empty ', bg = 'green', fg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.playgreenlabel.pack(side = LEFT, pady=(0, 5))
-            window.playpileslabels['Green'] = window.playpileslabel
-            window.playbluelabel = tk.Label(window.play_frame, text=' Blue:   empty ', bg = 'blue', fg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.playbluelabel.pack(side = LEFT, pady=(0, 5))
-            window.playpileslabels['Blue'] = window.playpileslabel
-            window.playwhitelabel = tk.Label(window.play_frame, text=' White:  empty ', bg = 'white', borderwidth=2, relief="groove", width=15, height=5)
-            window.playwhitelabel.pack(side = LEFT, pady=(0, 5))
-            window.playpileslabels['White'] = window.playpileslabel
-            window.playyellowlabel = tk.Label(window.play_frame, text=' Yellow: empty ', bg = 'yellow', borderwidth=2, relief="groove", width=15, height=5)
-            window.playyellowlabel.pack(side = LEFT, pady=(0, 5))
-            window.playpileslabels['Yellow'] = window.playpileslabel
-            window.playmultilabel = tk.Label(window.play_frame, text=' Multi:  empty ', borderwidth=2, relief="groove", width=15, height=5)
-            window.playmultilabel.pack(side = LEFT, padx=(0, 5), pady=(0, 5))
-            window.playpileslabels['Multi'] = window.playpileslabel
+            window.playpileslabels = self.colour_piles(window.play_frame, 'play')
 
             ## Display appropriate buttons / play area
-            
+            for widget in window.actionsframe.winfo_children():
+                widget.destroy()
+
             # If no longer my turn
             if window.player_num == last_player:
-                window.playaction.destroy()
-                window.discardaction.destroy()
-                window.infoaction.destroy()        
-                window.waitmessage = tk.Label(self.PlayerWindows[window.player_num], text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
+                window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
                 window.waitmessage.pack(side = TOP, pady=(0,10))
-                # Start of go - display three buttons
-                # Resolving action
-                    # 
-                # Someone elses go
-            
+                
+            # If now my turn
             if window.player_num == last_player + 1:
-                continue
-            return
+                window.actionslabel = ttk.Label(window.actionsframe, text='Choose your Action:')
+                window.actionslabel.pack(side=TOP)
+                window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(window, self.player_num))
+                window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
+                window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(window, self.player_num))
+                window.discardaction.pack(side=LEFT, pady=(0, 5))
+                if self.Hanabi.info_num != 0:
+                    window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(window, self.player_num))
+                    #window.infoaction['command'] = self.guigiveinfo(player_num)
+                    window.infoaction.pack(side=LEFT, pady=(0, 5))
+                else:
+                    window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=20)
+                    window.infoaction.pack(side=LEFT, pady=(0, 5))
+
+        return
 
         
     def opens_player_window(self):
