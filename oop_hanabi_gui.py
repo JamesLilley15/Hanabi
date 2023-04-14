@@ -80,7 +80,6 @@ class hanabi():
         self.take_turn()
         return
 
-
     def play(self):
         chosen_card = self.choose_card()
         win = FALSE
@@ -386,24 +385,22 @@ class gui(tk.Tk, hanabi):
             window.label = tk.Label(window.actionsframe, text = 'Please Choose which Player to Give Information to')
             window.label.pack(side=TOP)
             cont = tk.IntVar()
+            window.buttonsframe =tk.Frame(window.actionsframe)
+            window.buttonsframe.pack(side=TOP)
             for i in range(self.Hanabi.num_players):
-                k = 0
                 if i != player_num:
                     if i == 0:
-                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(0, cont))
+                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(0, cont), width = 15)
                     elif i == 1:
-                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(1, cont))
+                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(1, cont), width = 15)
                     elif i == 2:
-                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(2, cont))
+                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(2, cont), width = 15)
                     elif i == 3:
-                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(3, cont))
+                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(3, cont), width = 15)
                     else:
-                        window.button = tk.Button(window.actionsframe, text='Player ' + str(i+1), command=lambda: self.setvar(4, cont))
-                    if k == 0:
-                        window.button.pack(side=TOP)
-                    else:
-                        window.button.pack(side=LEFT)
-                    k += 1
+                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(4, cont), width = 15)
+                    window.button.pack(side=LEFT)
+                    
             window.wait_variable(cont)
             playerinfo = int(self.v)
             for widget in window.actionsframe.winfo_children():
@@ -413,9 +410,11 @@ class gui(tk.Tk, hanabi):
         window.label = tk.Label(window.actionsframe, text = 'Please Choose which Type of Information to Give')
         window.label.pack(side=TOP)
         cont = tk.IntVar()
-        window.button = tk.Button(window.actionsframe, text='Colour', command=lambda: self.setvar('colour', cont))
-        window.button.pack(side=TOP)
-        window.button = tk.Button(window.actionsframe, text='Number', command=lambda: self.setvar('number', cont))
+        window.buttonsframe = tk.Frame(window.actionsframe)
+        window.buttonsframe.pack(side=TOP)
+        window.button = tk.Button(window.buttonsframe, text='Colour', command=lambda: self.setvar('colour', cont), width=30)
+        window.button.pack(side=LEFT)
+        window.button = tk.Button(window.buttonsframe, text='Number', command=lambda: self.setvar('number', cont), width=30)
         window.button.pack(side=LEFT)
         window.wait_variable(cont)
         for widget in window.actionsframe.winfo_children():
@@ -423,33 +422,38 @@ class gui(tk.Tk, hanabi):
         colourornumber = str(self.v)
 
         # Choose which colour or number
+        
         if colourornumber == 'colour':
             window.label = tk.Label(window.actionsframe, text = 'Please Choose a Colour to Give Information On')
             window.label.pack(side=TOP)
-            window.button = tk.Button(window.actionsframe, text='Red(s)', command=lambda: self.setvar('Red', cont))
-            window.button.pack(side=TOP)
-            window.button = tk.Button(window.actionsframe, text='Green(s)', command=lambda: self.setvar('Green', cont))
+            window.buttonsframe = tk.Frame(window.actionsframe)
+            window.buttonsframe.pack(side=TOP)
+            window.button = tk.Button(window.buttonsframe, text='Red(s)', command=lambda: self.setvar('Red', cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='Blue(s)', command=lambda: self.setvar('Blue', cont))
+            window.button = tk.Button(window.buttonsframe, text='Green(s)', command=lambda: self.setvar('Green', cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='White(s)', command=lambda: self.setvar('White', cont))
+            window.button = tk.Button(window.buttonsframe, text='Blue(s)', command=lambda: self.setvar('Blue', cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='Yellow(s)', command=lambda: self.setvar('Yellow', cont))
+            window.button = tk.Button(window.buttonsframe, text='White(s)', command=lambda: self.setvar('White', cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='Multi(s)', command=lambda: self.setvar('Multi', cont))
+            window.button = tk.Button(window.buttonsframe, text='Yellow(s)', command=lambda: self.setvar('Yellow', cont), width = 15)
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.buttonsframe, text='Multi(s)', command=lambda: self.setvar('Multi', cont), width = 15)
             window.button.pack(side=LEFT)
         else:
             window.label = tk.Label(window.actionsframe, text = 'Please Choose a Number to Give Information On')
             window.label.pack(side=TOP)
-            window.button = tk.Button(window.actionsframe, text='One(s)', command=lambda: self.setvar(1, cont))
-            window.button.pack(side=TOP)
-            window.button = tk.Button(window.actionsframe, text='Two(s)', command=lambda: self.setvar(2, cont))
+            window.buttonsframe = tk.Frame(window.actionsframe)
+            window.buttonsframe.pack(side=TOP)
+            window.button = tk.Button(window.buttonsframe, text='One(s)', command=lambda: self.setvar(1, cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='Three(s)', command=lambda: self.setvar(3, cont))
+            window.button = tk.Button(window.buttonsframe, text='Two(s)', command=lambda: self.setvar(2, cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='Four(s)', command=lambda: self.setvar(4, cont))
+            window.button = tk.Button(window.buttonsframe, text='Three(s)', command=lambda: self.setvar(3, cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.actionsframe, text='Five(s)', command=lambda: self.setvar(5, cont))
+            window.button = tk.Button(window.buttonsframe, text='Four(s)', command=lambda: self.setvar(4, cont), width = 15)
+            window.button.pack(side=LEFT)
+            window.button = tk.Button(window.buttonsframe, text='Five(s)', command=lambda: self.setvar(5, cont), width = 15)
             window.button.pack(side=LEFT)
         window.wait_variable(cont)
         for widget in window.actionsframe.winfo_children():
@@ -468,7 +472,7 @@ class gui(tk.Tk, hanabi):
         self.Hanabi.info_num+=-1
 
         # End turn
-        window.message = tk.Label(window.actionsframe, text='\n\n Information Given! \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+        window.message = tk.Label(window.actionsframe, text='\n\n Information Given! \n\n Player '+str(playerinfo+1)+' must Look at their Table now... \n\n Then Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
         window.message.pack(side = TOP, pady=(0,10))
         
         window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
@@ -538,12 +542,12 @@ class gui(tk.Tk, hanabi):
         del self.Hanabi.players_hands[hand_num][card]
         dealt_card = self.Hanabi.deck.pop(random.randrange(len(self.Hanabi.deck)))
         self.Hanabi.players_hands[hand_num].append(dealt_card)
-        print(self.Hanabi.players_hands[hand_num])
         return
     
     def refresh_display(self, windows_reset, last_player):
+        next_player = (last_player+1) % self.Hanabi.num_players
         for window in windows_reset:
-            # Re-size window
+                    # Re-size window
             #window.geometry('1500x500')
 
             # Display INfo and Lives
@@ -599,26 +603,24 @@ class gui(tk.Tk, hanabi):
             for widget in window.actionsframe.winfo_children():
                 widget.destroy()
 
-            # If no longer my turn
-            if window.player_num == last_player:
-                window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
-                window.waitmessage.pack(side = TOP, pady=(0,10))
-                
+            
             # If now my turn
-            if window.player_num == last_player + 1:
+            if window.player_num == next_player:
                 window.actionslabel = ttk.Label(window.actionsframe, text='Choose your Action:')
                 window.actionslabel.pack(side=TOP)
-                window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(window, self.player_num))
+                window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(windows_reset[next_player], next_player))
                 window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
-                window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(window, self.player_num))
+                window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(windows_reset[next_player], next_player))
                 window.discardaction.pack(side=LEFT, pady=(0, 5))
                 if self.Hanabi.info_num != 0:
-                    window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(window, self.player_num))
-                    #window.infoaction['command'] = self.guigiveinfo(player_num)
+                    window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(windows_reset[next_player], next_player))
                     window.infoaction.pack(side=LEFT, pady=(0, 5))
                 else:
                     window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=20)
                     window.infoaction.pack(side=LEFT, pady=(0, 5))
+            else:
+                window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
+                window.waitmessage.pack(side = TOP, pady=(0,10))
 
         return
 
