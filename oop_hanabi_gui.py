@@ -9,8 +9,8 @@ class hanabi():
     def __init__(self, num_players):
         # Define basic variables
         #self.num_players = int(input('How many players? '))
-        self.info_num = 8
-        self.lives_num = 4
+        self.info_num = 7
+        self.lives_num = 3
         self.turn_count = 0
         self.end_game_count = 500
         self.player_turn = 0
@@ -522,6 +522,8 @@ class gui(tk.Tk, hanabi):
             else:
                 window.message = tk.Label(window.actionsframe, text='\n\n Card Successfully Played! :) \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
                 window.message.pack(side = TOP, pady=(0,10))
+                if number == 5:
+                    self.Hanabi.info_num+=1
         else:         
             self.Hanabi.lives_num+=-1
             if self.Hanabi.lives_num == 0:
@@ -612,11 +614,11 @@ class gui(tk.Tk, hanabi):
                 window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
                 window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(windows_reset[next_player], next_player))
                 window.discardaction.pack(side=LEFT, pady=(0, 5))
-                if self.Hanabi.info_num != 0:
+                if self.Hanabi.info_num >= 0:
                     window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(windows_reset[next_player], next_player))
                     window.infoaction.pack(side=LEFT, pady=(0, 5))
                 else:
-                    window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=20)
+                    window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=40)
                     window.infoaction.pack(side=LEFT, pady=(0, 5))
             else:
                 window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
