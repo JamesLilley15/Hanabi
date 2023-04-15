@@ -15,6 +15,7 @@ class hanabi():
         self.end_game_count = 500
         self.player_turn = 0
         self.num_players = num_players
+        self.playing_with_multi = True
 
         ## Deal Decks ##
         print('Dealing...')
@@ -480,7 +481,10 @@ class gui(tk.Tk, hanabi):
         return
     
     def findcards(self, info, hand):
-        return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x]
+        if type(info) is str and self.Hanabi.playing_with_multi:
+            return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info or 'Multi' in x]
+        else:
+            return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x]
 
     def choose_card(self, window, player_num):
         # Tell player to choose a card
