@@ -159,6 +159,7 @@ class hanabi():
 import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import *
+from tkinter import scrolledtext
 from tkinter.ttk import *
 
 class gui(tk.Tk, hanabi):
@@ -257,7 +258,7 @@ class gui(tk.Tk, hanabi):
         window.protocol("WM_DELETE_WINDOW", exit)
         window.title('Player ' + str(player_num+1) + "'s Window")
         window.player_num = player_num       
-        window.geometry('1000x850')
+        window.geometry('1000x1000')
 
         # Set up frame for own hand
         window.own_hand_frame = tk.Frame(window, borderwidth=2, relief="groove")
@@ -337,7 +338,7 @@ class gui(tk.Tk, hanabi):
         else:
             window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
             window.waitmessage.pack(side = TOP, pady=(0,10))
-        
+
         # Display Info, lives and deck
         window.deck_label = tk.Label(window, text = 'Cards Remaining in Deck: \n \n' + str(len(self.Hanabi.deck)), bg = 'White', relief = "groove", borderwidth = 2, width=30, height=5)
         window.deck_label.pack(side=BOTTOM, pady = 10)
@@ -346,7 +347,12 @@ class gui(tk.Tk, hanabi):
         window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1) + '\n')
         window.info.pack(side= LEFT, padx = 30)        
         window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1)+ '\n')
-        window.lives.pack(side=LEFT, padx = 30, pady = 3)
+        window.lives.pack(side=LEFT, padx = 30, pady = 10)
+
+        # Give space for notes
+        window.textbox = tk.scrolledtext.ScrolledText(window, width = 40, height = 5)# text = 'You may add notes here...')
+        window.textbox.pack(side=BOTTOM, pady = 10)
+
         return window
 
     def guidiscard(self, window, player_num):
