@@ -422,8 +422,7 @@ class gui(tk.Tk, hanabi):
             widget.destroy()
         colourornumber = str(self.v)
 
-        # Choose which colour or number
-        
+        # Choose which colour or number       
         if colourornumber == 'colour':
             window.label = tk.Label(window.actionsframe, text = 'Please Choose a Colour to Give Information On')
             window.label.pack(side=TOP)
@@ -456,26 +455,34 @@ class gui(tk.Tk, hanabi):
             window.button.pack(side=LEFT)
             window.button = tk.Button(window.buttonsframe, text='Five(s)', command=lambda: self.setvar(5, cont), width = 15)
             window.button.pack(side=LEFT)
+        
+        # Wait for the players choice and then log it
         window.wait_variable(cont)
-        for widget in window.actionsframe.winfo_children():
-            widget.destroy()
         if colourornumber == 'colour':
             info = str(self.v)
         else:
             info = int(self.v)
-        for widget in self.PlayerWindows[playerinfo].actionsframe.winfo_children():
+        
+        # Give the information to every player
+        message = 'Player ' + str(player_num+1) + ' tells you that your Cards ' + str(self.findcards(info,playerinfo)) + ' are ' + str(info)
+        for pwindow in self.PlayerWindows:
+            for widget in pwindow.actionsframe.winfo_children():
+                widget.destroy()
+            pwindow.label = tk.Label(pwindow.actionsframe, text = message)
+            pwindow.label.pack(side=TOP)
+
+        # Remove the information from the player who gave the information
+        for widget in window.actionsframe.winfo_children():
             widget.destroy()
 
-        # Give the information
-        self.PlayerWindows[playerinfo].label = tk.Label(self.PlayerWindows[playerinfo].actionsframe, text = 'Player ' + str(player_num+1) + ' tells you that your Cards ' + str(self.findcards(info,playerinfo)) + ' are ' + str(info))
-        self.PlayerWindows[playerinfo].label.pack(side=TOP)
-
+        # Use up a piece pf information
         self.Hanabi.info_num+=-1
 
-        # End turn
-        window.message = tk.Label(window.actionsframe, text='\n\n Information Given! \n\n Player '+str(playerinfo+1)+' must Look at their Table now... \n\n Then Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+        # Warn the player not to end turn until the info has been seen
+        window.message = tk.Label(window.actionsframe, text='\n\n Information Given! \n\n Players must Look at their Table Before you End your Turn... \n\n Then Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
         window.message.pack(side = TOP, pady=(0,10))
         
+        # End turn button
         window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
         window.end_turn.pack(side=TOP, pady = 10)
         return
@@ -535,6 +542,7 @@ class gui(tk.Tk, hanabi):
             else:
                 window.message = tk.Label(window.actionsframe, text='\n\n Failed to Play Card... :( \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
                 window.message.pack(side = TOP, pady=(0,10))
+                self.Hanabi.discard_decks[colour].append(number)
         
         self.redeal_card(place_in_hand, player_num)
 
@@ -629,7 +637,6 @@ class gui(tk.Tk, hanabi):
                 window.waitmessage.pack(side = TOP, pady=(0,10))
 
         return
-
         
     def opens_player_window(self):
         
