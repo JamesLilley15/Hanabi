@@ -258,7 +258,12 @@ class gui(tk.Tk, hanabi):
         window.protocol("WM_DELETE_WINDOW", exit)
         window.title('Player ' + str(player_num+1) + "'s Window")
         window.player_num = player_num       
-        window.geometry('1000x1000')
+        window.geometry('1500x1000')
+
+        # Set up log
+        window.log = tk.scrolledtext.ScrolledText(window, width = 50, height = 50)# text = 'You may add notes here...')
+        window.log.configure(state='disabled')
+        window.log.pack(side=RIGHT)
 
         # Set up frame for own hand
         window.own_hand_frame = tk.Frame(window, borderwidth=2, relief="groove")
@@ -371,7 +376,14 @@ class gui(tk.Tk, hanabi):
         window.message = tk.Label(window.actionsframe, text='\n\n You Discarded a ' + colour + ' ' + str(number) + '... \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
         window.message.pack(side = TOP, pady=(0,10))
         
+        # Update log
+        for pwindow in self.PlayerWindows:
+            pwindow.log.configure(state='normal')
+            pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Discarded a ' + colour + ' ' + str(number)+'.\n\n')
+            pwindow.log.configure(state='disabled')
+        
         self.redeal_card(place_in_hand, player_num)
+
 
         window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
         window.end_turn.pack(side=TOP, pady = 10)
@@ -478,6 +490,10 @@ class gui(tk.Tk, hanabi):
             pwindow.label = tk.Label(pwindow.actionsframe, text = message)
             pwindow.label.pack(side=TOP)
 
+            # Update log whilst we're here        
+            pwindow.log.configure(state='normal')
+            pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Told Player ' + str(playerinfo) + ' where his ' + str(info) + "'s were.\n\n")
+            pwindow.log.configure(state='disabled')
         # Remove the information from the player who gave the information
         for widget in window.actionsframe.winfo_children():
             widget.destroy()
@@ -542,6 +558,12 @@ class gui(tk.Tk, hanabi):
                 window.message.pack(side = TOP, pady=(0,10))
                 if number == 5:
                     self.Hanabi.info_num+=1
+                # Update log
+                for pwindow in self.PlayerWindows:
+                    pwindow.log.configure(state='normal')
+                    pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Successfully Played a ' + colour + ' ' + str(number)+'.\n\n')
+                    pwindow.log.configure(state='disabled')
+
         else:         
             self.Hanabi.lives_num+=-1
             if self.Hanabi.lives_num == 0:
@@ -550,6 +572,11 @@ class gui(tk.Tk, hanabi):
                 window.message = tk.Label(window.actionsframe, text='\n\n Failed to Play a ' + colour + ' ' + str(number) + '... :( \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
                 window.message.pack(side = TOP, pady=(0,10))
                 self.Hanabi.discard_decks[colour].append(number)
+                # Update log
+                for pwindow in self.PlayerWindows:
+                    pwindow.log.configure(state='normal')
+                    pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Failed to Play a ' + colour + ' ' + str(number)+'.\n\n')
+                    pwindow.log.configure(state='disabled')
         
         self.redeal_card(place_in_hand, player_num)
 
@@ -567,6 +594,7 @@ class gui(tk.Tk, hanabi):
     
     def refresh_display(self, windows_reset, last_player):
         next_player = (last_player+1) % self.Hanabi.num_players
+        self.Hanabi.turn_count+=1
         for window in windows_reset:
                     # Re-size window
             #window.geometry('1500x500')
