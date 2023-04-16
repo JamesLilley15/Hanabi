@@ -361,7 +361,7 @@ class gui(tk.Tk, hanabi):
         if self.Hanabi.info_num != 8:
             self.Hanabi.info_num+=1
 
-        window.message = tk.Label(window.actionsframe, text='\n\n Card Discarded... \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+        window.message = tk.Label(window.actionsframe, text='\n\n You Discarded a ' + colour + ' ' + str(number) + '... \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
         window.message.pack(side = TOP, pady=(0,10))
         
         self.redeal_card(place_in_hand, player_num)
@@ -531,7 +531,7 @@ class gui(tk.Tk, hanabi):
             if all(value == 5 for value in self.Hanabi.played_decks.values()):
                 self.guiwin()
             else:
-                window.message = tk.Label(window.actionsframe, text='\n\n Card Successfully Played! :) \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+                window.message = tk.Label(window.actionsframe, text='\n\n A ' + colour + ' ' + str(number) + ' Successfully Played! :) \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
                 window.message.pack(side = TOP, pady=(0,10))
                 if number == 5:
                     self.Hanabi.info_num+=1
@@ -540,7 +540,7 @@ class gui(tk.Tk, hanabi):
             if self.Hanabi.lives_num == 0:
                 self.guilose()
             else:
-                window.message = tk.Label(window.actionsframe, text='\n\n Failed to Play Card... :( \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
+                window.message = tk.Label(window.actionsframe, text='\n\n Failed to Play a ' + colour + ' ' + str(number) + '... :( \n\n Press "End your Turn" to Update the Display \n\n', width =100, relief = 'groove')
                 window.message.pack(side = TOP, pady=(0,10))
                 self.Hanabi.discard_decks[colour].append(number)
         
