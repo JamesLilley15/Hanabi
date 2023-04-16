@@ -257,15 +257,7 @@ class gui(tk.Tk, hanabi):
         window.protocol("WM_DELETE_WINDOW", exit)
         window.title('Player ' + str(player_num+1) + "'s Window")
         window.player_num = player_num       
-        window.geometry('1000x700')
-        
-        # Display INfo and Lives
-        window.infolivesframe = tk.Frame(window)
-        window.infolivesframe.pack(side=BOTTOM)
-        window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1) + '\n')
-        window.info.pack(side= LEFT)        
-        window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1)+ '\n')
-        window.lives.pack(side=LEFT, padx = 30)
+        window.geometry('1000x850')
 
         # Set up frame for own hand
         window.own_hand_frame = tk.Frame(window, borderwidth=2, relief="groove")
@@ -345,7 +337,16 @@ class gui(tk.Tk, hanabi):
         else:
             window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
             window.waitmessage.pack(side = TOP, pady=(0,10))
-            
+        
+        # Display Info, lives and deck
+        window.deck_label = tk.Label(window, text = 'Cards Remaining in Deck: \n \n' + str(len(self.Hanabi.deck)), bg = 'White', relief = "groove", borderwidth = 2, width=30, height=5)
+        window.deck_label.pack(side=BOTTOM, pady = 10)
+        window.infolivesframe = tk.Frame(window, borderwidth=2, relief="groove")
+        window.infolivesframe.pack(side=BOTTOM)
+        window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1) + '\n')
+        window.info.pack(side= LEFT, padx = 30)        
+        window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1)+ '\n')
+        window.lives.pack(side=LEFT, padx = 30, pady = 3)
         return window
 
     def guidiscard(self, window, player_num):
@@ -564,14 +565,6 @@ class gui(tk.Tk, hanabi):
                     # Re-size window
             #window.geometry('1500x500')
 
-            # Display INfo and Lives
-            window.info.destroy()
-            window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1))
-            window.info.pack(side=BOTTOM)  
-            window.lives.destroy()      
-            window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1))
-            window.lives.pack(side=LEFT)
-
             # Set up frame for each other hand
             for [player_hand_num, players_hand_frame] in window.playershandsframes:
                 # Clear widgets from each hands frames
@@ -636,32 +629,24 @@ class gui(tk.Tk, hanabi):
                 window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
                 window.waitmessage.pack(side = TOP, pady=(0,10))
 
+            # Display info, lives and deck
+            window.deck_label.destroy()
+            window.deck_label = tk.Label(window, text = 'Cards Remaining in Deck: \n \n' + str(len(self.Hanabi.deck)), bg = 'White', relief = "groove", borderwidth = 2, width=30, height=5)
+            window.deck_label.pack(side=BOTTOM, pady = 10)
+            window.info.destroy()
+            window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1))
+            window.info.pack(side=BOTTOM)  
+            window.lives.destroy()      
+            window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1))
+            window.lives.pack(side=LEFT)
+
         return
         
-    def opens_player_window(self):
-        
-        # Label each frame
-        #k = 1
-        #window.playershandslabels = []
-        #for i in window.playershandsframes:
-        #    playershand = []
-        #    name = 'Player ' + str(k) + "'s Hand"
-        #    self.label = tk.Label(i, text = name)
-        #    self.label.pack(side=TOP)
-        #    k += 1
-        #    self.playershandslabels.append(playershand)
-        
-        
-                
+    def opens_player_window(self):           
         self.button = tk.Button(self, text='Click to Start', borderwidth=2, relief="groove")
         self.button['command'] = self.start()
         self.button.pack(side=TOP)
-    
-    
-    def start_turn(self, hanabi):
-        print(hanabi.num_players)
-        # Display players hands
-        
+        return
 
     def set_player_num(self, i):
         hanabi.num_players = i
