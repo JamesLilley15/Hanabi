@@ -512,7 +512,7 @@ class gui(tk.Tk, hanabi):
     
     def findcards(self, info, hand):
         if type(info) is str and self.Hanabi.playing_with_multi:
-            return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info or 'Multi' in x]
+            return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x or 'Multi' in x]
         else:
             return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x]
 
