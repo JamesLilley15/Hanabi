@@ -457,8 +457,6 @@ class gui(tk.Tk, hanabi):
             window.button.pack(side=LEFT)
             window.button = tk.Button(window.buttonsframe, text='Yellow(s)', command=lambda: self.setvar('Yellow', cont), width = 15)
             window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Multi(s)', command=lambda: self.setvar('Multi', cont), width = 15)
-            window.button.pack(side=LEFT)
         else:
             window.label = tk.Label(window.actionsframe, text = 'Please Choose a Number to Give Information On')
             window.label.pack(side=TOP)
