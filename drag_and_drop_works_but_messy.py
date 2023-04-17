@@ -276,10 +276,11 @@ class gui(tk.Tk, hanabi):
         for i in range(5):
             cardnum = str(window.num_through_my_hand)
             window.cardlabel = tk.Label(window.own_hand_frame, bg = 'White', relief = "groove", borderwidth = 2, text = 'Card #' + cardnum, width=10, height=5)
-            window.cardlabel.pack(side = LEFT)
+            #window.cardlabel.pack(side = LEFT)
+            window.cardlabel.place(x = (500*(i+1))/6, y = 75, anchor = CENTER)
             window.num_through_my_hand+=1
-            self.make_draggable(window.cardlabel)
-            window.own_hand.append([i, window.cardlabel, self.Hanabi.players_hands[player_num][i]])
+            self.make_draggable(window.cardlabel, window)
+            window.own_hand.append([i, window.cardlabel, self.Hanabi.players_hands[player_num][i], i+1])
 
             
         #self.deal_own_draggable_hand(window, window.player_num, window.own_hand_frame)
@@ -394,7 +395,7 @@ class gui(tk.Tk, hanabi):
         self.redeal_card(place_in_hand, player_num, window)
 
 
-        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
+        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num, True))
         window.end_turn.pack(side=TOP, pady = 10)
 
         return
@@ -515,7 +516,7 @@ class gui(tk.Tk, hanabi):
         window.message.pack(side = TOP, pady=(0,10))
         
         # End turn button
-        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
+        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num, True))
         window.end_turn.pack(side=TOP, pady = 10)
         return
     
@@ -589,7 +590,7 @@ class gui(tk.Tk, hanabi):
         
         self.redeal_card(place_in_hand, player_num, place_in_hand, window)
 
-        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num))
+        window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num, True))
         window.end_turn.pack(side=TOP, pady = 10)
 
         return
@@ -606,49 +607,36 @@ class gui(tk.Tk, hanabi):
         window.cardlabel.pack(side = RIGHT)
         window.num_through_my_hand+=1
         self.make_draggable(window.cardlabel)
-        window.own_hand.append([4, window.cardlabel, dealt_card])
+        window.own_hand.append([4, window.cardlabel, dealt_card, cardnum])
 
         return
     
-    def refresh_display(self, windows_reset, last_player):
-        def x_coord(self, e):
-            return e.winfo_x()
-        next_player = (last_player+1) % self.Hanabi.num_players
-
+    def refresh_display(self, windows_reset, last_player, end_turn):
         # Work out new order of each hand:
-        for window in windows_reset:
-            n = len(window.own_hand)
-            for i in range(n):
-                for j in range(n-1):
-                    if window.own_hand[j][1].winfo_x() > window.own_hand[j+1][1].winfo_x():
-                        window.own_hand[j], window.own_hand[j+1] = window.own_hand[j+1], window.own_hand[j]
-            print
-            self.Hanabi.players_hands[window.player_num]=[]
-        
-            for i in range(n):
-                print ()
-                self.Hanabi.players_hands[window.player_num].append(window.own_hand[i][2])
-        self.Hanabi.turn_count+=1
-        for window in windows_reset:
-                    # Re-size window
-            #window.geometry('1500x500')
+        if end_turn:
+            for window in windows_reset:
+                n = len(window.own_hand)
+                for i in range(n):
+                    for j in range(n-1):
+                        if window.own_hand[j][1].winfo_x() > window.own_hand[j+1][1].winfo_x():
+                            window.own_hand[j], window.own_hand[j+1] = window.own_hand[j+1], window.own_hand[j]
+                print
+                self.Hanabi.players_hands[window.player_num]=[]
+            
+                for i in range(n):
+                    print ()
+                    self.Hanabi.players_hands[window.player_num].append(window.own_hand[i][2])
+            self.Hanabi.turn_count+=1
 
-            #if window.own_hand.sort 
-            #for cardnum in range(5):
-            #        colour = str(self.Hanabi.players_hands[handnum][cardnum][0])
-            #        number = str(self.Hanabi.players_hands[handnum][cardnum][1])##
-#
- #                   if colour == 'Blue' or colour == 'Red' or colour == 'Green':
-  #                      window.cardlabel = tk.Label(players_hand_frame, fg = 'White', bg = colour, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
-   #                     window.cardlabel.pack(side = LEFT)
-    #                if colour == 'Yellow' or colour == 'White':
-     #                   window.cardlabel = tk.Label(players_hand_frame, bg = colour, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
-      #                  window.cardlabel.pack(side = LEFT)
-       #             if colour == 'Multi':                    
-        #                window.cardlabel = tk.Label(players_hand_frame, relief = "groove", borderwidth = 2, text = colour + ' ' + number, width=10, height=5)
-         #               window.cardlabel.pack(side = LEFT)
+        for window in windows_reset:
+            # Re-jig own hand:
+            if window.player_num == last_player:
+                for number, widget, card, num_through in window.own_hand:
+                    widget.place(x = (500*(number+1))/6, y = 75, anchor = CENTER)
+                    window.num_through_my_hand+=1
+                    self.make_draggable(window.cardlabel, window)
 
-            #self.deal_own_draggable_hand(window, window.player_num, window.own_hand_frame)
+            ## DEal other hands!
             for [player_hand_num, players_hand_frame] in window.playershandsframes:
                 # Clear widgets from each hands frames
                 for widget in players_hand_frame.winfo_children():
@@ -689,39 +677,40 @@ class gui(tk.Tk, hanabi):
             window.playpileslabel.pack(side=TOP)
             window.playpileslabels = self.colour_piles(window.play_frame, 'play')
 
-            ## Display appropriate buttons / play area
-            for widget in window.actionsframe.winfo_children():
-                widget.destroy()
+            if end_turn:
+                ## Display appropriate buttons / play area
+                for widget in window.actionsframe.winfo_children():
+                    widget.destroy()
 
-            
-            # If now my turn
-            if window.player_num == next_player:
-                window.actionslabel = ttk.Label(window.actionsframe, text='Choose your Action:')
-                window.actionslabel.pack(side=TOP)
-                window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(windows_reset[next_player], next_player))
-                window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
-                window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(windows_reset[next_player], next_player))
-                window.discardaction.pack(side=LEFT, pady=(0, 5))
-                if self.Hanabi.info_num >= 0:
-                    window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(windows_reset[next_player], next_player))
-                    window.infoaction.pack(side=LEFT, pady=(0, 5))
+                
+                # If now my turn
+                if window.player_num == next_player:
+                    window.actionslabel = ttk.Label(window.actionsframe, text='Choose your Action:')
+                    window.actionslabel.pack(side=TOP)
+                    window.playaction = tk.Button(window.actionsframe, text='\n Play a Card \n', width=20, command = lambda: self.guiplay(windows_reset[next_player], next_player))
+                    window.playaction.pack(side=LEFT, padx=(5, 0), pady=(0, 5))
+                    window.discardaction = tk.Button(window.actionsframe, text='\nDiscard a Card\n', width=20, command = lambda: self.guidiscard(windows_reset[next_player], next_player))
+                    window.discardaction.pack(side=LEFT, pady=(0, 5))
+                    if self.Hanabi.info_num >= 0:
+                        window.infoaction = tk.Button(window.actionsframe, text='\nGive Information\n', width=20, command = lambda: self.guiinfo(windows_reset[next_player], next_player))
+                        window.infoaction.pack(side=LEFT, pady=(0, 5))
+                    else:
+                        window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=40)
+                        window.infoaction.pack(side=LEFT, pady=(0, 5))
                 else:
-                    window.infoaction = tk.Label(window.actionsframe, text = "\nNo Pieces of Information Remaining\n You must Play or Discard \n", width=40)
-                    window.infoaction.pack(side=LEFT, pady=(0, 5))
-            else:
-                window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
-                window.waitmessage.pack(side = TOP, pady=(0,10))
+                    window.waitmessage = tk.Label(window.actionsframe, text='\n\n Not your turn - talk to the others! :) \n\n', width =100, relief = 'groove')
+                    window.waitmessage.pack(side = TOP, pady=(0,10))
 
-            # Display info, lives and deck
-            window.deck_label.destroy()
-            window.deck_label = tk.Label(window, text = 'Cards Remaining in Deck: \n \n' + str(len(self.Hanabi.deck)), bg = 'White', relief = "groove", borderwidth = 2, width=30, height=5)
-            window.deck_label.pack(side=BOTTOM, pady = 10)
-            window.info.destroy()
-            window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1))
-            window.info.pack(side=BOTTOM)  
-            window.lives.destroy()      
-            window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1))
-            window.lives.pack(side=LEFT)
+                # Display info, lives and deck
+                window.deck_label.destroy()
+                window.deck_label = tk.Label(window, text = 'Cards Remaining in Deck: \n \n' + str(len(self.Hanabi.deck)), bg = 'White', relief = "groove", borderwidth = 2, width=30, height=5)
+                window.deck_label.pack(side=BOTTOM, pady = 10)
+                window.info.destroy()
+                window.info = tk.Label(window.infolivesframe, text = 'Pieces of Information Remaining: ' + str(self.Hanabi.info_num+1))
+                window.info.pack(side=BOTTOM)  
+                window.lives.destroy()      
+                window.lives = tk.Label(window.infolivesframe, text = 'Lives Remaining: ' + str(self.Hanabi.lives_num+1))
+                window.lives.pack(side=LEFT)
 
         return
 
@@ -752,20 +741,84 @@ class gui(tk.Tk, hanabi):
                 self.make_draggable(window.cardlabel)
                 window.own_hand.append(window.cardlabel)
 
-    def make_draggable(self, widget):
+    def make_draggable(self, widget, window):
         widget.bind("<Button-1>", self.on_drag_start)
         widget.bind("<B1-Motion>", self.on_drag_motion)
+        widget.bind("<ButtonRelease-1>", self.on_drag_end)
 
     def on_drag_start(self, event):
         widget = event.widget
         widget._drag_start_x = event.x
         widget._drag_start_y = event.y
 
+    def on_drag_end(self, event):
+        # Figure out what the new order should be
+        # Where is the dragged widget closest to
+        moved_widget = event.widget
+        #moved_widget.winfo
+        shortest_distance = 999
+        #window.own_hand.append([i, window.cardlabel, self.Hanabi.players_hands[player_num][i]])
+        for number, widget, card, num_through in moved_widget.master.master.own_hand:
+            #print('new card info',number, widget.winfo_x(), card)
+            #print(moved_widget.winfo_x())
+            print('test', widget, moved_widget)
+            print('Test', widget.winfo_x(), moved_widget.winfo_x())
+            if widget == moved_widget:
+                old_number = number
+            elif abs(widget.winfo_x()-moved_widget.winfo_x())<shortest_distance:
+                shortest_distance=abs(widget.winfo_x()-moved_widget.winfo_x())
+                print('shorter', number, shortest_distance)
+                replaced_widget = number
+        temp = moved_widget.master.master.own_hand[old_number]
+        if old_number == replaced_widget:
+            return
+        elif old_number < replaced_widget:
+            # Moved everything up to replaced_widget down one and moved widget up
+            for i in range(old_number, replaced_widget):
+                print(i)
+                moved_widget.master.master.own_hand[i] = moved_widget.master.master.own_hand[i+1]
+                moved_widget.master.master.own_hand[i][0]=i
+        else:
+            for i in range(4-old_number, 4-replaced_widget):
+                moved_widget.master.master.own_hand[4-i] = moved_widget.master.master.own_hand[3-i]
+                moved_widget.master.master.own_hand[4-i][0]=4-i
+        
+        moved_widget.master.master.own_hand[replaced_widget] = temp
+        moved_widget.master.master.own_hand[replaced_widget][0]=replaced_widget
+        print('own_hand', moved_widget.master.master.own_hand)
+        
+        self.Hanabi.players_hands[moved_widget.master.master.player_num]=[]
+        for i in range(5):
+            self.Hanabi.players_hands[moved_widget.master.master.player_num].append(moved_widget.master.master.own_hand[i][2])
+        self.refresh_display(self.PlayerWindows, moved_widget.master.master.player_num, False)
+
+        #for card in moved_widget.master.master.own_hand:
+            #if card[1] == replaced_widget:
+
+                
+        # Which way does the widget there need to shift
+        # Reorder
+
+
+        #for window in windows_reset:
+        #    n = len(window.own_hand)
+        #    for i in range(n):
+        #        for j in range(n-1):
+        #            if window.own_hand[j][1].winfo_x() > window.own_hand[j+1][1].winfo_x():
+        #                window.own_hand[j], window.own_hand[j+1] = window.own_hand[j+1], window.own_hand[j]
+        #    print
+        #    self.Hanabi.players_hands[window.player_num]=[]
+       # 
+       #     for i in range(n):
+       #         print ()
+       #         self.Hanabi.players_hands[window.player_num].append(window.own_hand[i][2])
+       # # Show the new order everywhere
+
     def on_drag_motion(self, event):
         widget = event.widget
         x = widget.winfo_x() - widget._drag_start_x + event.x
         y = widget.winfo_y() - widget._drag_start_y + event.y
-        widget.place(x=x, y=y)
+        widget.place(x=x, y=y, anchor=NW)
 
     def opens_player_window(self):           
         self.button = tk.Button(self, text='Click to Start', borderwidth=2, relief="groove")
