@@ -166,6 +166,8 @@ class gui(tk.Tk, hanabi):
     def __init__(self):
         #super().__init__()
         self.colours = ['Red', 'Green', 'Blue', 'White', 'Yellow', 'Multi']
+        self.pure_colours = ['Red', 'Green', 'Blue', 'White', 'Yellow']
+        self.spelled_numbers = ['One', 'Two', 'Three', 'Four', 'Five']
 
         self.menu = tk.Tk()
         self.menu.title('Hanabi')
@@ -194,40 +196,8 @@ class gui(tk.Tk, hanabi):
         self.Hanabi = hanabi(int(self.scalevar.get()))
         self.menu.withdraw()
 
-        # Open a window (inc. dealing a hand) for each player.
-        self.PlayerWindows = []
-        if self.Hanabi.num_players == 2:
-            self.PlayerOne = self.open_player_window(0)
-            self.PlayerWindows.append(self.PlayerOne)
-            self.PlayerTwo = self.open_player_window(1)
-            self.PlayerWindows.append(self.PlayerTwo)
-        if self.Hanabi.num_players == 3:
-            self.PlayerOne = self.open_player_window(0)
-            self.PlayerWindows.append(self.PlayerOne)
-            self.PlayerTwo = self.open_player_window(1)
-            self.PlayerWindows.append(self.PlayerTwo)
-            self.PlayerThree = self.open_player_window(2)
-            self.PlayerWindows.append(self.PlayerThree)
-        if self.Hanabi.num_players == 4:
-            self.PlayerOne = self.open_player_window(0)
-            self.PlayerWindows.append(self.PlayerOne)
-            self.PlayerTwo = self.open_player_window(1) 
-            self.PlayerWindows.append(self.PlayerTwo)           
-            self.PlayerThree = self.open_player_window(2)
-            self.PlayerWindows.append(self.PlayerThree)
-            self.PlayerFour = self.open_player_window(3)
-            self.PlayerWindows.append(self.PlayerFour)
-        if self.Hanabi.num_players == 5:
-            self.PlayerOne = self.open_player_window(0)
-            self.PlayerWindows.append(self.PlayerOne)
-            self.PlayerTwo = self.open_player_window(1)
-            self.PlayerWindows.append(self.PlayerTwo)
-            self.PlayerThree = self.open_player_window(2)
-            self.PlayerWindows.append(self.PlayerThree)
-            self.PlayerFour = self.open_player_window(3)
-            self.PlayerWindows.append(self.PlayerFour)
-            self.PlayerFive = self.open_player_window(4)
-            self.PlayerWindows.append(self.PlayerFive)
+        # Open a window (inc. dealing a hand) for each player
+        self.PlayerWindows = [self.open_player_window(i) for i in range(self.Hanabi.num_players)]
 
     def colour_label(self, frame, c, d):
                 if c == 'Multi':
@@ -393,6 +363,7 @@ class gui(tk.Tk, hanabi):
     def setvar(self,value,cont):
                 cont.set(1)
                 self.v = value
+                print(self.v) #remove this when done
                 return 
     
     def guiinfo(self, window, player_num):
@@ -409,16 +380,7 @@ class gui(tk.Tk, hanabi):
             window.buttonsframe.pack(side=TOP)
             for i in range(self.Hanabi.num_players):
                 if i != player_num:
-                    if i == 0:
-                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(0, cont), width = 15)
-                    elif i == 1:
-                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(1, cont), width = 15)
-                    elif i == 2:
-                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(2, cont), width = 15)
-                    elif i == 3:
-                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(3, cont), width = 15)
-                    else:
-                        window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda: self.setvar(4, cont), width = 15)
+                    window.button = tk.Button(window.buttonsframe, text='Player ' + str(i+1), command=lambda i=i: self.setvar(i, cont), width = 15)
                     window.button.pack(side=LEFT)
                     
             window.wait_variable(cont)
@@ -447,33 +409,17 @@ class gui(tk.Tk, hanabi):
             window.label.pack(side=TOP)
             window.buttonsframe = tk.Frame(window.actionsframe)
             window.buttonsframe.pack(side=TOP)
-            window.button = tk.Button(window.buttonsframe, text='Red(s)', command=lambda: self.setvar('Red', cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Green(s)', command=lambda: self.setvar('Green', cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Blue(s)', command=lambda: self.setvar('Blue', cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='White(s)', command=lambda: self.setvar('White', cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Yellow(s)', command=lambda: self.setvar('Yellow', cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Multi(s)', command=lambda: self.setvar('Multi', cont), width = 15)
-            window.button.pack(side=LEFT)
+            for c in self.pure_colours:
+                window.button = tk.Button(window.buttonsframe, text=f'{c}(s)', command=lambda c=c: self.setvar(c, cont), width = 15)
+                window.button.pack(side=LEFT)
         else:
             window.label = tk.Label(window.actionsframe, text = 'Please Choose a Number to Give Information On')
             window.label.pack(side=TOP)
             window.buttonsframe = tk.Frame(window.actionsframe)
             window.buttonsframe.pack(side=TOP)
-            window.button = tk.Button(window.buttonsframe, text='One(s)', command=lambda: self.setvar(1, cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Two(s)', command=lambda: self.setvar(2, cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Three(s)', command=lambda: self.setvar(3, cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Four(s)', command=lambda: self.setvar(4, cont), width = 15)
-            window.button.pack(side=LEFT)
-            window.button = tk.Button(window.buttonsframe, text='Five(s)', command=lambda: self.setvar(5, cont), width = 15)
-            window.button.pack(side=LEFT)
+            for i, spelled_num in enumerate(self.spelled_numbers):
+                window.button = tk.Button(window.buttonsframe, text=f'{spelled_num}(s)', command=lambda i=i: self.setvar(i+1, cont), width = 15)
+                window.button.pack(side=LEFT)
         
         # Wait for the players choice and then log it
         window.wait_variable(cont)
@@ -492,7 +438,7 @@ class gui(tk.Tk, hanabi):
 
             # Update log whilst we're here        
             pwindow.log.configure(state='normal')
-            pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Told Player ' + str(playerinfo) + ' where his ' + str(info) + "'s were.\n\n")
+            pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num+1) + ' Told Player ' + str(playerinfo+1) + ' where his ' + str(info) + "'s were.\n\n")
             pwindow.log.configure(state='disabled')
         # Remove the information from the player who gave the information
         for widget in window.actionsframe.winfo_children():
@@ -512,7 +458,7 @@ class gui(tk.Tk, hanabi):
     
     def findcards(self, info, hand):
         if type(info) is str and self.Hanabi.playing_with_multi:
-            return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info or 'Multi' in x]
+            return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x or 'Multi' in x]
         else:
             return [i+1 for i, x in enumerate(self.Hanabi.players_hands[hand]) if info in x]
 
