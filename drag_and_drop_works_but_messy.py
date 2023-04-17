@@ -391,10 +391,9 @@ class gui(tk.Tk, hanabi):
             pwindow.log.configure(state='normal')
             pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Discarded a ' + colour + ' ' + str(number)+'.\n\n')
             pwindow.log.configure(state='disabled')
-        
+        print('herere')
         self.redeal_card(place_in_hand, player_num, window)
-
-
+        print('Here!')
         window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num, True))
         window.end_turn.pack(side=TOP, pady = 10)
 
@@ -588,7 +587,7 @@ class gui(tk.Tk, hanabi):
                     pwindow.log.insert(tk.INSERT, 'Turn ' + str(self.Hanabi.turn_count+1) + ': \n Player ' + str(player_num) + ' Failed to Play a ' + colour + ' ' + str(number)+'.\n\n')
                     pwindow.log.configure(state='disabled')
         
-        self.redeal_card(place_in_hand, player_num, place_in_hand, window)
+        self.redeal_card(place_in_hand, player_num, window)
 
         window.end_turn = tk.Button(window.actionsframe, text='\n End your Turn \n', width=20, command = lambda: self.refresh_display(self.PlayerWindows, player_num, True))
         window.end_turn.pack(side=TOP, pady = 10)
@@ -601,31 +600,37 @@ class gui(tk.Tk, hanabi):
         dealt_card = self.Hanabi.deck.pop(random.randrange(len(self.Hanabi.deck)))
         self.Hanabi.players_hands[hand_num].append(dealt_card)
         window.own_hand[card][1].destroy()
+        for number, widget, card_, num_through in window.own_hand:
+            if number >= card:
+                window.own_hand[number][0] = number - 1
         del window.own_hand[card]
         cardnum = str(window.num_through_my_hand)
         window.cardlabel = tk.Label(window.own_hand_frame, bg = 'White', relief = "groove", borderwidth = 2, text = 'Card #' + cardnum, width=10, height=5)
-        window.cardlabel.pack(side = RIGHT)
+        window.cardlabel.place()
         window.num_through_my_hand+=1
-        self.make_draggable(window.cardlabel)
+        self.make_draggable(window.cardlabel, window)
         window.own_hand.append([4, window.cardlabel, dealt_card, cardnum])
-
+        for number, widget, card, num_through in window.own_hand:
+            print('TEst', number, num_through)
+            widget.place(x = (500*(number+1))/6, y = 75, anchor = CENTER)
         return
     
     def refresh_display(self, windows_reset, last_player, end_turn):
         # Work out new order of each hand:
+        next_player = last_player + 1
         if end_turn:
-            for window in windows_reset:
-                n = len(window.own_hand)
-                for i in range(n):
-                    for j in range(n-1):
-                        if window.own_hand[j][1].winfo_x() > window.own_hand[j+1][1].winfo_x():
-                            window.own_hand[j], window.own_hand[j+1] = window.own_hand[j+1], window.own_hand[j]
-                print
-                self.Hanabi.players_hands[window.player_num]=[]
-            
-                for i in range(n):
-                    print ()
-                    self.Hanabi.players_hands[window.player_num].append(window.own_hand[i][2])
+            #for window in windows_reset:
+            #    n = len(window.own_hand)
+            #    for i in range(n):
+            #        for j in range(n-1):
+            #            if window.own_hand[j][1].winfo_x() > window.own_hand[j+1][1].winfo_x():
+            #                window.own_hand[j], window.own_hand[j+1] = window.own_hand[j+1], window.own_hand[j]
+            #    print
+            #    self.Hanabi.players_hands[window.player_num]=[]
+            ##
+            #    for i in range(n):
+            #        print ()
+            #        self.Hanabi.players_hands[window.player_num].append(window.own_hand[i][2])
             self.Hanabi.turn_count+=1
 
         for window in windows_reset:
@@ -633,8 +638,7 @@ class gui(tk.Tk, hanabi):
             if window.player_num == last_player:
                 for number, widget, card, num_through in window.own_hand:
                     widget.place(x = (500*(number+1))/6, y = 75, anchor = CENTER)
-                    window.num_through_my_hand+=1
-                    self.make_draggable(window.cardlabel, window)
+                    #self.make_draggable(window.cardlabel, window)
 
             ## DEal other hands!
             for [player_hand_num, players_hand_frame] in window.playershandsframes:
